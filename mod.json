@@ -8,6 +8,7 @@
 	},
 	"id": "entity12208.jumpbot",
 	"name": "JumpBot",
+	"description": "A auto-macro for Geometry Dash!"
 	"version": "1.0.1",
 	"developer": "Entity12208"
 }
