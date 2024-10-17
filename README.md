@@ -1,6 +1,7 @@
 # JumpBot
 
-[![JumpBot](https://github.com/entity12208/JumpBot/raw/main/logo.png)](https://github.com/entity12208/JumpBot/blob/main/logo.png)
+![JumpBot](https://github.com/user-attachments/assets/c623a949-384e-48ab-9245-c2feb9403431)
+
 
 ## Description
 
