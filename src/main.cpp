@@ -1,84 +1,66 @@
-#include <Geode/Geode.hpp>
-#include <Geode/loader/SettingEvent.hpp>
+#include "JumpBot.h"
 
-#include <Geode/modify/PlayLayer.hpp>
-#include <Geode/modify/CCEGLView.hpp>
-#include <Geode/modify/GJBaseGameLayer.hpp>
-#include <Geode/modify/PlayerObject.hpp>
-#include <Geode/modify/EndLevelLayer.hpp>
-#include <Geode/modify/CreatorLayer.hpp>
-#include <Geode/modify/GJGameLevel.hpp>
+bool JumpBot::init() {
+    // Set up keybind for CTRL + J
+    Mod::registerKeybind(Keybind("CTRL + J", [this]() {
+        this->recording = !this->recording;
+        if (this->recording) {
+            this->jumpPositions.clear();
+            this->currentLevelName = Mod::getGame()->getLevelName();
+        } else {
+            this->saveInstructions(this->currentLevelName);
+        }
+    }));
 
-#include <fstream>
-#include <string>
-#include <vector>
+    // Hook into the death event
+    Mod::hook<GameManager>(GameManager::deathHook, [this](GameManager* self) {
+        if (this->recording) {
+            float deathPosition = self->getPlayer()->getPosition().x;
+            this->recordJump(deathPosition);
+        }
+        return GameManager::deathHook(self);
+    });
 
-using namespace geode::prelude;
+    // Hook into the level start event
+    Mod::hook<GameManager>(GameManager::startHook, [this](GameManager* self) {
+        if (!this->recording) {
+            this->loadInstructions(Mod::getGame()->getLevelName());
+        }
+        return GameManager::startHook(self);
+    });
 
-class $modify(Level) {
-    std::vector<int> portalOrder;
-    bool ctrlJPressed = false;
+    return true;
+}
 
-    void onLevelStart() override {
-        Level::onLevelStart(); // Call the base class method
-        if (isCtrlJPressed()) {
-            scanPortalOrder();
+void JumpBot::recordJump(float position) {
+    if (this->jumpPositions.size() >= 3) {
+        // Check if the last three positions match
+        if (this->jumpPositions[this->jumpPositions.size() - 1] == position &&
+            this->jumpPositions[this->jumpPositions.size() - 2] == position &&
+            this->jumpPositions[this->jumpPositions.size() - 3] == position) {
+            return;
         }
     }
+    this->jumpPositions.push_back(position);
+}
 
-    void onDeath() override {
-        Level::onDeath(); // Call the base class method
-        retryLevelWithJump();
+void JumpBot::loadInstructions(const std::string& levelName) {
+    std::ifstream file("jumpbot_" + levelName + ".txt");
+    if (!file.is_open()) return;
+
+    float position;
+    this->jumpPositions.clear();
+    while (file >> position) {
+        this->jumpPositions.push_back(position);
     }
 
-    bool isCtrlJPressed() {
-        return (GetAsyncKeyState(VK_CONTROL) & 0x8000) && (GetAsyncKeyState('J') & 0x8000);
-    }
+    file.close();
+}
 
-    void scanPortalOrder() {
-        portalOrder.clear();
-        for (auto& portal : getPortals()) {
-            portalOrder.push_back(portal->getType());
-        }
-        ctrlJPressed = true;
+void JumpBot::saveInstructions(const std::string& levelName) {
+    std::ofstream file("jumpbot_" + levelName + ".txt");
+    for (float position : this->jumpPositions) {
+        file << position << std::endl;
     }
-
-    void retryLevelWithJump() {
-        if (ctrlJPressed) {
-            for (int i = 0; i < 3; ++i) {
-                jumpBeforeDeath();
-            }
-            logOutcome();
-        }
-    }
-
-    void jumpBeforeDeath() {
-        // Logic to jump before the moment of death
-        auto player = getPlayer();
-        if (player) {
-            player->jump();
-        }
-    }
-
-    void logOutcome() {
-        std::ofstream logFile;
-        logFile.open(getLevelName() + ".txt", std::ios::app);
-        logFile << "Outcome logged\n";
-        logFile.close();
-    }
-
-    std::string getLevelName() {
-        auto level = getCurrentLevel();
-        return level ? level->getName() : "Unknown";
-    }
-
-    std::vector<Portal*> getPortals() {
-        auto level = getCurrentLevel();
-        return level ? level->getPortals() : std::vector<Portal*>{};
-    }
-
-    Player* getPlayer() {
-        auto level = getCurrentLevel();
-        return level ? level->getPlayer() : nullptr;
-    }
-};
+    file.close();
+}
