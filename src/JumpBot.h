@@ -1,22 +1,20 @@
 #pragma once
 
 #include <Geode/Bindings.hpp>
-#include <Geode/Geode.hpp>
+#include <Geode/modify/GameManager.hpp>
 #include <fstream>
 #include <vector>
 
 using namespace geode::prelude;
 
-class JumpBot : public Mod {
+class JumpBot : public Interface<JumpBot> {
 public:
-    virtual bool init() override;
-    void recordJump(float position);
+    JumpBot();
     void loadInstructions(const std::string& levelName);
-    void saveInstructions(const std::string& levelName);
 
 private:
-    std::vector<float> jumpPositions;
-    std::string currentLevelName;
-    bool recording = false;
+    std::vector<float> deathPositions;
+    std::string currentLevel;
+    void saveInstructions();
+    void jumpBeforeDeathPoint(float deathPosition);
 };
-
