@@ -1,5 +1,14 @@
-#include <Geode/Geode.hpp> 
-#include <Geode/modify/Level.hpp>
+#include <Geode/Geode.hpp>
+#include <Geode/loader/SettingEvent.hpp>
+
+#include <Geode/modify/PlayLayer.hpp>
+#include <Geode/modify/CCEGLView.hpp>
+#include <Geode/modify/GJBaseGameLayer.hpp>
+#include <Geode/modify/PlayerObject.hpp>
+#include <Geode/modify/EndLevelLayer.hpp>
+#include <Geode/modify/CreatorLayer.hpp>
+#include <Geode/modify/GJGameLevel.hpp>
+
 #include <fstream>
 #include <string>
 #include <vector>
