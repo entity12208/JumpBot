@@ -1,66 +1,70 @@
-#include "JumpBot.h"
+#include <Geode/Geode.hpp>
+#include <Geode/modify/GameManager.hpp>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <cmath>
 
-bool JumpBot::init() {
-    // Set up keybind for CTRL + J
-    Mod::registerKeybind(Keybind("CTRL + J", [this]() {
-        this->recording = !this->recording;
-        if (this->recording) {
-            this->jumpPositions.clear();
-            this->currentLevelName = Mod::getGame()->getLevelName();
-        } else {
-            this->saveInstructions(this->currentLevelName);
-        }
-    }));
+using namespace geode::prelude;
 
-    // Hook into the death event
-    Mod::hook<GameManager>(GameManager::deathHook, [this](GameManager* self) {
-        if (this->recording) {
-            float deathPosition = self->getPlayer()->getPosition().x;
-            this->recordJump(deathPosition);
-        }
-        return GameManager::deathHook(self);
-    });
+std::string fileName = "level_name_jumps.txt";
+std::vector<float> jumpPositions;
+bool shouldJump = false;
 
-    // Hook into the level start event
-    Mod::hook<GameManager>(GameManager::startHook, [this](GameManager* self) {
-        if (!this->recording) {
-            this->loadInstructions(Mod::getGame()->getLevelName());
-        }
-        return GameManager::startHook(self);
-    });
-
-    return true;
-}
-
-void JumpBot::recordJump(float position) {
-    if (this->jumpPositions.size() >= 3) {
-        // Check if the last three positions match
-        if (this->jumpPositions[this->jumpPositions.size() - 1] == position &&
-            this->jumpPositions[this->jumpPositions.size() - 2] == position &&
-            this->jumpPositions[this->jumpPositions.size() - 3] == position) {
-            return;
-        }
-    }
-    this->jumpPositions.push_back(position);
-}
-
-void JumpBot::loadInstructions(const std::string& levelName) {
-    std::ifstream file("jumpbot_" + levelName + ".txt");
-    if (!file.is_open()) return;
-
-    float position;
-    this->jumpPositions.clear();
-    while (file >> position) {
-        this->jumpPositions.push_back(position);
-    }
-
-    file.close();
-}
-
-void JumpBot::saveInstructions(const std::string& levelName) {
-    std::ofstream file("jumpbot_" + levelName + ".txt");
-    for (float position : this->jumpPositions) {
-        file << position << std::endl;
+void saveJumpPositions() {
+    std::ofstream file(fileName);
+    for (const auto& pos : jumpPositions) {
+        file << pos << "\n";
     }
     file.close();
 }
+
+void loadJumpPositions() {
+    std::ifstream file(fileName);
+    float pos;
+    jumpPositions.clear();
+    while (file >> pos) {
+        jumpPositions.push_back(pos);
+    }
+    file.close();
+}
+
+void onDeath() {
+    auto player = GameManager::sharedState()->getPlayer();
+    float deathPos = player->getPositionX();
+    jumpPositions.push_back(deathPos);
+    saveJumpPositions();
+}
+
+void onPlayerTick() {
+    if (shouldJump) {
+        auto player = GameManager::sharedState()->getPlayer();
+        float playerPos = player->getPositionX();
+        for (const auto& pos : jumpPositions) {
+            if (fabs(playerPos - pos) < 0.1) {
+                player->jump();
+            }
+        }
+    }
+}
+
+$execute {
+    if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('J')) {
+        shouldJump = !shouldJump;
+        if (shouldJump) {
+            loadJumpPositions();
+        }
+    }
+}
+
+struct $modify(GameManager) {
+    void onPlayerDeath(Player* player) {
+        GameManager::onPlayerDeath(player);
+        onDeath();
+    }
+
+    void update(float dt) {
+        GameManager::update(dt);
+        onPlayerTick();
+    }
+};
