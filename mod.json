@@ -1,0 +1,13 @@
+{
+	"geode": "4.0.1",
+	"gd": {
+		"win": "2.2074",
+		"macos": "2.2074"
+	},
+	"id": "entity12208.jumpbot",
+	"name": "JumpBot",
+	"description": "A auto-macro for Geometry Dash!",
+	"tags": ["gameplay", "enhancement"],
+	"version": "1.0.0",
+	"developer": "Entity12208"
+}
