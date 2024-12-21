@@ -17,12 +17,12 @@ public:
     static inline bool playingBack = false;
     static inline size_t playbackIndex = 0;
 
-    void onEnable() override {
+    void onEnable() {
         // geode::utils::log("JumpBot mod enabled.");
         resetState();
     }
 
-    void onDisable() override {
+    void onDisable() {
         // geode::utils::log("JumpBot mod disabled.");
         resetState();
     }
@@ -76,12 +76,10 @@ class $modify(GameManager) {
     }
 };
 
-GEODE_MOD_REGISTER(JumpBot)
-
 class JumpBotMod : public geode::Mod {
 public:
-    void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event) override {
-        if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_TAB && cocos2d::EventKeyboard::isKeyPressed(cocos2d::EventKeyboard::KeyCode::KEY_ALT)) {
+    void onKeyPressed(geode::Event::KeyCode keyCode, geode::Event* event) {
+        if (keyCode == geode::Event::KeyCode::KEY_TAB && geode::Event::isKeyPressed(geode::Event::KeyCode::KEY_ALT)) {
             if (!JumpBot::recording && !JumpBot::playingBack) {
                 JumpBot::recording = true;
                 JumpBot::jumpAttempts.clear();
