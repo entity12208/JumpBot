@@ -3,7 +3,6 @@
 #include <Geode/modify/GameManager.hpp>
 #include <Geode/utils/file.hpp>
 #include <Geode/utils/cocos.hpp>
-#include <Geode/utils/logger.hpp>
 #include <fstream>
 #include <vector>
 #include <unordered_map>
