@@ -3,7 +3,7 @@
 #include <Geode/modify/GameManager.hpp>
 #include <Geode/utils/file.hpp>
 #include <Geode/utils/cocos.hpp>
-#include <Geode/cocos/robtop/keyboard_dispatcher/CCKeyboardDelegate.h> // Include the replacement header
+#include <cocos2d.h> // Include the Cocos2d header for EventKeyboard
 #include <fstream>
 #include <vector>
 #include <unordered_map>
@@ -75,10 +75,10 @@ class $modify(GameManager) {
     }
 };
 
-class JumpBotMod : public cocos2d::CCKeyboardDelegate { // Inherit from CCKeyboardDelegate
+class JumpBotMod : public cocos2d::EventListenerKeyboard { // Inherit from EventListenerKeyboard
 public:
-    void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event) override { // Use EventKeyboard::KeyCode and Event
-        if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_TAB && cocos2d::EventKeyboard::isKeyPressed(cocos2d::EventKeyboard::KeyCode::KEY_ALT)) {
+    bool onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event) override { // Use EventKeyboard::KeyCode and Event
+        if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_TAB && cocos2d::EventKeyboard::KeyCode::KEY_ALT) {
             if (!JumpBot::recording && !JumpBot::playingBack) {
                 JumpBot::recording = true;
                 JumpBot::jumpAttempts.clear();
@@ -100,5 +100,6 @@ public:
                 JumpBot::playbackIndex = 0;
             }
         }
+        return true;
     }
 };
