@@ -46,18 +46,18 @@ class $modify(PlayerObject) {
                 JumpBot::successfulJumps.push_back(deathPos);
             }
         }
-        PlayerObject::die(unknown);
+        this->die(unknown);
     }
 
     void update(float dt) {
         if (JumpBot::playingBack && JumpBot::playbackIndex < JumpBot::jumpPlayback.size()) {
             float currentPos = this->getPositionX();
             if (currentPos >= JumpBot::jumpPlayback[JumpBot::playbackIndex]) {
-                PlayerObject::jump(false); 
+                this->jump(false); 
                 JumpBot::playbackIndex++;
             }
         }
-        PlayerObject::update(dt);
+        this->update(dt);
     }
 };
 
@@ -71,14 +71,14 @@ class $modify(GameManager) {
             outFile.close();
             JumpBot::successfulJumps.clear();
         }
-        GameManager::levelComplete();
+        this->levelComplete();
     }
 };
 
 class JumpBotMod : public cocos2d::CCKeyboardDelegate { // Inherit from CCKeyboardDelegate
 public:
-    void onKeyPressed(cocos2d::CCKeyCode keyCode, cocos2d::CCEvent* event) override { // Use CCKeyCode and CCEvent
-        if (keyCode == cocos2d::CCKeyCode::KEY_Tab && cocos2d::CCKeyboardDelegate::isKeyPressed(cocos2d::CCKeyCode::KEY_Alt)) {
+    void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event) override { // Use EventKeyboard::KeyCode and Event
+        if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_TAB && cocos2d::EventKeyboard::isKeyPressed(cocos2d::EventKeyboard::KeyCode::KEY_ALT)) {
             if (!JumpBot::recording && !JumpBot::playingBack) {
                 JumpBot::recording = true;
                 JumpBot::jumpAttempts.clear();
