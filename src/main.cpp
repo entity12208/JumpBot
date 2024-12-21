@@ -7,7 +7,7 @@
 #include <vector>
 #include <unordered_map>
 
-class JumpBot : public geode::Mod {
+class JumpBot {
 public:
     static inline std::unordered_map<float, int> jumpAttempts;
     static inline std::vector<float> successfulJumps;
@@ -47,18 +47,18 @@ class $modify(PlayerObject) {
                 JumpBot::successfulJumps.push_back(deathPos);
             }
         }
-        PlayerObject::playerWillDie(player, unknown);
+        player->PlayerObject::playerWillDie(player, unknown);
     }
 
     void update(float dt) {
         if (JumpBot::playingBack && JumpBot::playbackIndex < JumpBot::jumpPlayback.size()) {
             float currentPos = this->getPositionX();
             if (currentPos >= JumpBot::jumpPlayback[JumpBot::playbackIndex]) {
-                this->jump(false); 
+                this->PlayerObject::jump(false); 
                 JumpBot::playbackIndex++;
             }
         }
-        PlayerObject::update(dt);
+        this->PlayerObject::update(dt);
     }
 };
 
@@ -76,10 +76,10 @@ class $modify(GameManager) {
     }
 };
 
-class JumpBotMod : public geode::Mod {
+class JumpBotMod {
 public:
-    void onKeyPressed(geode::Event::KeyCode keyCode, geode::Event* event) {
-        if (keyCode == geode::Event::KeyCode::KEY_TAB && geode::Event::isKeyPressed(geode::Event::KeyCode::KEY_ALT)) {
+    void onKeyPressed(geode::cocos::EventKeyboard::KeyCode keyCode, geode::cocos::Event* event) {
+        if (keyCode == geode::cocos::EventKeyboard::KeyCode::KEY_TAB && geode::cocos::EventKeyboard::isKeyPressed(geode::cocos::EventKeyboard::KeyCode::KEY_ALT)) {
             if (!JumpBot::recording && !JumpBot::playingBack) {
                 JumpBot::recording = true;
                 JumpBot::jumpAttempts.clear();
