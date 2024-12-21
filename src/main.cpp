@@ -18,12 +18,10 @@ public:
     static inline size_t playbackIndex = 0;
 
     void onEnable() {
-        // geode::utils::log("JumpBot mod enabled.");
         resetState();
     }
 
     void onDisable() {
-        // geode::utils::log("JumpBot mod disabled.");
         resetState();
     }
 
@@ -39,26 +37,26 @@ public:
 };
 
 class $modify(PlayerObject) {
-    void playerWillDie(PlayerObject* player, bool unknown) {
+    void die(bool unknown) {
         if (JumpBot::recording) {
-            float deathPos = player->getPositionX();
+            float deathPos = this->getPositionX();
             JumpBot::jumpAttempts[deathPos]++;
             if (JumpBot::jumpAttempts[deathPos] >= 2) {
                 JumpBot::successfulJumps.push_back(deathPos);
             }
         }
-        player->playerWillDie(unknown);
+        PlayerObject::die(unknown);
     }
 
     void update(float dt) {
         if (JumpBot::playingBack && JumpBot::playbackIndex < JumpBot::jumpPlayback.size()) {
             float currentPos = this->getPositionX();
             if (currentPos >= JumpBot::jumpPlayback[JumpBot::playbackIndex]) {
-                this->jump(false); 
+                PlayerObject::jump(false); 
                 JumpBot::playbackIndex++;
             }
         }
-        this->update(dt);
+        PlayerObject::update(dt);
     }
 };
 
@@ -72,19 +70,18 @@ class $modify(GameManager) {
             outFile.close();
             JumpBot::successfulJumps.clear();
         }
-        this->levelComplete();
+        GameManager::levelComplete();
     }
 };
 
 class JumpBotMod {
 public:
-    void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event) {
-        if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_TAB && cocos2d::EventKeyboard::isKeyPressed(cocos2d::EventKeyboard::KeyCode::KEY_ALT)) {
+    void onKeyPressed(geode::EventKeyboard::KeyCode keyCode, geode::Event* event) {
+        if (keyCode == geode::EventKeyboard::KeyCode::KEY_TAB && geode::EventKeyboard::isKeyPressed(geode::EventKeyboard::KeyCode::KEY_ALT)) {
             if (!JumpBot::recording && !JumpBot::playingBack) {
                 JumpBot::recording = true;
                 JumpBot::jumpAttempts.clear();
                 JumpBot::successfulJumps.clear();
-                // geode::utils::log("JumpBot recording started.");
             } else if (JumpBot::recording) {
                 JumpBot::recording = false;
                 JumpBot::playingBack = true;
@@ -96,13 +93,10 @@ public:
                     JumpBot::jumpPlayback.push_back(pos);
                 }
                 inFile.close();
-                // geode::utils::log("JumpBot playback started.");
             } else if (JumpBot::playingBack) {
-
                 JumpBot::playingBack = false;
                 JumpBot::jumpPlayback.clear();
                 JumpBot::playbackIndex = 0;
-                // geode::utils::log("JumpBot playback stopped.");
             }
         }
     }
