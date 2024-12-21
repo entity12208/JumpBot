@@ -47,18 +47,18 @@ class $modify(PlayerObject) {
                 JumpBot::successfulJumps.push_back(deathPos);
             }
         }
-        player->PlayerObject::playerWillDie(player, unknown);
+        player->playerWillDie(unknown);
     }
 
     void update(float dt) {
         if (JumpBot::playingBack && JumpBot::playbackIndex < JumpBot::jumpPlayback.size()) {
             float currentPos = this->getPositionX();
             if (currentPos >= JumpBot::jumpPlayback[JumpBot::playbackIndex]) {
-                this->PlayerObject::jump(false); 
+                this->jump(false); 
                 JumpBot::playbackIndex++;
             }
         }
-        this->PlayerObject::update(dt);
+        this->update(dt);
     }
 };
 
@@ -72,14 +72,14 @@ class $modify(GameManager) {
             outFile.close();
             JumpBot::successfulJumps.clear();
         }
-        GameManager::levelComplete();
+        this->levelComplete();
     }
 };
 
 class JumpBotMod {
 public:
-    void onKeyPressed(geode::cocos::EventKeyboard::KeyCode keyCode, geode::cocos::Event* event) {
-        if (keyCode == geode::cocos::EventKeyboard::KeyCode::KEY_TAB && geode::cocos::EventKeyboard::isKeyPressed(geode::cocos::EventKeyboard::KeyCode::KEY_ALT)) {
+    void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event) {
+        if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_TAB && cocos2d::EventKeyboard::isKeyPressed(cocos2d::EventKeyboard::KeyCode::KEY_ALT)) {
             if (!JumpBot::recording && !JumpBot::playingBack) {
                 JumpBot::recording = true;
                 JumpBot::jumpAttempts.clear();
