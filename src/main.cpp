@@ -3,7 +3,6 @@
 #include <Geode/modify/GameManager.hpp>
 #include <Geode/utils/file.hpp>
 #include <Geode/utils/cocos.hpp>
-#include <Geode/utils/logging.hpp>
 #include <fstream>
 #include <vector>
 #include <unordered_map>
@@ -19,12 +18,12 @@ public:
     static inline size_t playbackIndex = 0;
 
     void onEnable() override {
-        geode::utils::log("JumpBot mod enabled.");
+        // geode::utils::log("JumpBot mod enabled.");
         resetState();
     }
 
     void onDisable() override {
-        geode::utils::log("JumpBot mod disabled.");
+        // geode::utils::log("JumpBot mod disabled.");
         resetState();
     }
 
@@ -87,7 +86,7 @@ public:
                 JumpBot::recording = true;
                 JumpBot::jumpAttempts.clear();
                 JumpBot::successfulJumps.clear();
-                geode::utils::log("JumpBot recording started.");
+                // geode::utils::log("JumpBot recording started.");
             } else if (JumpBot::recording) {
                 JumpBot::recording = false;
                 JumpBot::playingBack = true;
@@ -99,13 +98,13 @@ public:
                     JumpBot::jumpPlayback.push_back(pos);
                 }
                 inFile.close();
-                geode::utils::log("JumpBot playback started.");
+                // geode::utils::log("JumpBot playback started.");
             } else if (JumpBot::playingBack) {
 
                 JumpBot::playingBack = false;
                 JumpBot::jumpPlayback.clear();
                 JumpBot::playbackIndex = 0;
-                geode::utils::log("JumpBot playback stopped.");
+                // geode::utils::log("JumpBot playback stopped.");
             }
         }
     }
