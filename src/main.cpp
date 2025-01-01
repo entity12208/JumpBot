@@ -1,9 +1,19 @@
+/**
+ * Include the Geode headers.
+ */
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PlayerObject.hpp>
 #include <Geode/modify/GameManager.hpp>
+#include <Geode/loader/Event.hpp>
+#include <Geode/utils/cocos.hpp>
 #include <fstream>
 #include <vector>
 #include <unordered_map>
+
+/**
+ * Brings cocos2d and all Geode namespaces to the current scope.
+ */
+using namespace geode::prelude;
 
 class JumpBot {
 public:
@@ -27,7 +37,7 @@ public:
 };
 
 class $modify(PlayerObject) {
-    void die(bool unknown) {
+    void destroyPlayer(PlayerObject* player, bool isDeath) {
         if (JumpBot::recording) {
             float deathPos = this->getPositionX();
             JumpBot::jumpAttempts[deathPos]++;
@@ -35,7 +45,7 @@ class $modify(PlayerObject) {
                 JumpBot::successfulJumps.push_back(deathPos);
             }
         }
-        PlayerObject::die(unknown);
+        PlayerObject::destroyPlayer(player, isDeath);
     }
 
     void update(float dt) {
@@ -64,12 +74,11 @@ class $modify(GameManager) {
     }
 };
 
-class JumpBotMod : public Geode::EventListener {
+class JumpBotMod : public geode::EventListener {
 public:
     void setup() {
-        auto dispatcher = Geode::getEventDispatcher();
-        dispatcher->registerEvent<Geode::KeyEvent>([this](Geode::KeyEvent* event) {
-            if (event->getKeyCode() == Geode::KeyCode::KEY_TAB && event->isAltPressed()) {
+        geode::EventDispatcher::get()->registerEvent<geode::KeyEvent>([this](geode::KeyEvent* event) {
+            if (event->getKeyCode() == geode::KeyCode::KEY_TAB && event->isAltPressed()) {
                 handleKeyEvent();
                 return true;
             }
